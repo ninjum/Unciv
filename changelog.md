@@ -1,3 +1,146 @@
+## 4.13.18
+
+Better AI decisions for policy branches
+
+Modding: 
+- Allow fallback to "UnitTypeIcons/$unitName" if "UnitIcons/$unitName" does not exist
+- Added unique-weighted decision for policy branches
+- Better "hidden when" uniques for disabled religion, victory types
+
+Resolved rare crash when map contains improvements not in ruleset
+
+Add unique to show construction when unbuildable - By SeventhM
+
+## 4.13.17
+
+Mod management screen:
+- Cache online mod list for fast loading
+- Always allow mod search
+
+Modding: 
+- Allow removing free policies
+- Resolved crash on modded game with no capital city indicator
+
+AI: Improved automated worker tile selection
+
+Solve ANRs due to resuming music player which is in an unplayable state
+
+Don't auto-replace holy sites in G&K - By EmperorPinguin
+
+## 4.13.16
+
+AI: Better rules to not build unit-carrying units
+
+Units that can withdraw before melee do not do so when escorting civilian units
+
+Modding: 
+- Filtering uniques are also checked for in unit types
+- Added "if [modFilter] is not enabled" conditional
+
+UI: Free tech pickable in any way you enter the tech screen
+
+## 4.13.15
+
+Fixed spies stealing multiple tech steals in one turn
+
+Resolved new game ANRs in a better way
+
+AI: 
+- Keep 'don't spread religion' promises better
+- Greatly discourage attacking stronger enemies
+
+Modding:
+- Added "Remaining [civFilter] Civilizations" as countable value
+- Conditional phrasing: "for [civFilter]" -> "for [civFilter] Civilizations"
+- Resolved badly configured ruins causing crashes
+- Added 'City-State' as value for nationFilter
+
+## 4.13.14
+
+Ruleset validation for personalities with victory types not present in ruleset
+
+Added mod download percentage tracking
+
+Adjacent tiles updated when tile in changed in map editor, to update relevant edge tile images
+
+Remove "-0 HP" from city attack notifications
+
+Improve AI city settling, science game, and belief picking  - By EmperorPinguin
+
+Add two population-related conditional uniques  - By PLynx01
+
+## 4.13.13
+
+Minimized MP game update IO by ignoring games older than 2 weeks for 'update all'
+
+Resolved ANRs when pausing game due to game clone time
+
+Resolved ANRs when starting a new game (checking for multuplayer server connection)
+
+Protect terrainImage against incorrectly configured mods (natural wonder turnsInto is not in ruleset)
+
+Resolved race-condition error for loading terrain icons
+
+## 4.13.12
+
+Cannot have 2 research agreements at once due to counteroffers
+
+Modding: Added "upon losing/gaining the [promotion] status" unit triggers
+
+Mod branch parsing (downloading from user input url) can now handle branch names containing "/"
+
+Fixed "Top" edge tiles not showing - kudos @legacymtgsalvationuser69544
+
+## 4.13.11
+
+Better AI evaluation for 'win the game' buildings
+
+Modding:
+- Trigger uniques from religious beliefs activate correctly
+- Added "removing the [promotion] promotion/status" unit action modifier
+- Added 'upon gaining/losing [promotionName] promotion' unit trigger uniques 
+- Allow comment uniques and timed uniques in event choices
+
+Re-activate Thai language, now with diacritic support
+
+Improve AI tech and policy choices  - By EmperorPinguin
+
+## 4.13.10
+
+Tilesets: Added edge tile images!
+
+Great prophets bought in city with different religion do not get incorrect warning popup
+
+Getting all resources does not eliminate WLTK day
+
+modding: Added validations for 'replaces' being set when 'uniqueTo' is not (units/buildings/improvements)
+
+Invalid MP games cannot be 'joined'
+
+Changing rulesets in new game screen no longer leads to fake error warnings
+
+## 4.13.9
+
+Significant memory improvements - should allow for much larger maps on memory-constrained devices!
+
+CPU performance improvements 
+
+Solved rare automation crashes with escorted units
+
+## 4.13.8
+
+Allowed starting Scenarios, including Multiplayer, through the "New Game" screen! :D
+
+WLTK + continuous rendering no longer cause city tiles to be dimmed
+
+Fixed Scenario mods being undownloadable and needing to restart game to access Scenario picker
+
+Added Barbarian Musketman and Worker variants for AbsoluteUnits
+
+Images are restored to ruleset correctly when resuming open game screen
+
+BNW unit sprites for HexaRealm - By GeneralWadaling
+
 ## 4.13.7
 
 Performance improvements!

@@ -259,7 +259,7 @@ class ConstructionAutomation(val cityConstructions: CityConstructions) {
         if (!civInfo.hasUnique(UniqueType.EnablesConstructionOfSpaceshipParts)) return
         val spaceshipPart = (nonWonders + units).filter { it.name in spaceshipParts }.filterBuildable().firstOrNull()
             ?: return
-        val modifier = 3f * personality.modifierFocus(PersonalityValue.Science, .4f)
+        val modifier = 20f //We're weighing Apollo program according to personality. If we decided to invest in that, we might as well commit to it.
         addChoice(relativeCostEffectiveness, spaceshipPart.name, modifier)
     }
 
@@ -268,7 +268,7 @@ class ConstructionAutomation(val cityConstructions: CityConstructions) {
         for (building in buildings.filterBuildable()) {
             if (building.isWonder && city.isPuppet) continue
             // We shouldn't try to build wonders in undeveloped cities and empires
-            if (building.isWonder && !cityIsOverAverageProduction)
+            if (building.isWonder && !cityIsOverAverageProduction) continue
             if (building.isWonder && civInfo.cities.size < 3) continue
             addChoice(relativeCostEffectiveness, building.name, getValueOfBuilding(building, localUniqueCache))
         }
@@ -295,7 +295,8 @@ class ConstructionAutomation(val cityConstructions: CityConstructions) {
         var value = 0f
         if (!cityIsOverAverageProduction) return value
         if (building.isWonder) value += 2f
-        if (building.hasUnique(UniqueType.TriggersCulturalVictory)) value += 10f * personality.modifierFocus(PersonalityValue.Culture, .3f)
+        if (building.hasUnique(UniqueType.TriggersCulturalVictory)
+            || building.hasUnique(UniqueType.TriggersVictory)) value += 20f // if we're this close to actually winning, we don't care what your preferred victory type is
         if (building.hasUnique(UniqueType.EnablesConstructionOfSpaceshipParts)) value += 10f * personality.modifierFocus(PersonalityValue.Science, .3f)
         return value
     }

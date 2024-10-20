@@ -237,8 +237,10 @@ object UniqueTriggerActivation {
                 return { placeUnits() }
             }
             UniqueType.OneTimeFreeUnitRuins -> {
-                var civUnit = civInfo.getEquivalentUnit(unique.params[0])
-                if ( civUnit.isCityFounder() && civInfo.isOneCityChallenger()) {
+                val unitName = unique.params[0]
+                val baseUnit = ruleset.units[unitName] ?: return null
+                var civUnit = civInfo.getEquivalentUnit(baseUnit)
+                if (civUnit.isCityFounder() && civInfo.isOneCityChallenger()) {
                      val replacementUnit = ruleset.units.values
                          .firstOrNull {
                              it.getMatchingUniques(UniqueType.BuildImprovements)
@@ -985,9 +987,9 @@ object UniqueTriggerActivation {
             }
             UniqueType.OneTimeUnitLoseStatus -> {
                 if (unit == null) return null
-                val unitStatus = unit.statuses.firstOrNull { it.name == unique.params[1] } ?: return null
+                if (unit.statuses.none { it.name == unique.params[1] }) return null
                 return {
-                    unit.statuses.remove(unitStatus)
+                    unit.removeStatus(unique.params[1])
                     true
                 }
             }

@@ -109,8 +109,8 @@ class ModManagementScreen private constructor(
 
     // Enable re-sorting and syncing entries in 'installed' and 'repo search' ScrollPanes
     // Keep metadata and buttons in separate pools
-    private val installedModInfo = previousInstalledMods ?: HashMap(10) // HashMap<String, ModUIData> inferred
-    private val onlineModInfo = previousOnlineMods ?: HashMap(90) // HashMap<String, ModUIData> inferred
+    private val installedModInfo = previousInstalledMods ?: HashMap(10)
+    private val onlineModInfo = previousOnlineMods ?: HashMap(game.files.loadModCache().associateBy { it.name })
     private val modButtons: HashMap<ModUIData, ModDecoratedButton> = HashMap(100)
 
     // cleanup - background processing needs to be stopped on exit and memory freed
@@ -139,7 +139,11 @@ class ModManagementScreen private constructor(
             if (game.settings.tileSet !in tileSets) {
                 game.settings.tileSet = tileSets.first()
             }
-            game.popScreen()
+            val screen = game.popScreen()
+            
+            // We want to immediately display/hide Scenario button based on changes
+            if (screen is MainMenuScreen)
+                screen.game.replaceCurrentScreen(MainMenuScreen())
         }
         closeButton.keyShortcuts.add(KeyCharAndCode.BACK)
 
@@ -239,12 +243,13 @@ class ModManagementScreen private constructor(
         }
 
         loading.show()  // Now that it's on stage, start animation
+        replaceLoadingWithOptions()
+        
         // Allow clicking the loading icon to stop the query
         loading.onClick {
             if (runningSearchJob?.isActive != true) return@onClick
             runningSearchJob?.cancel()
             markOnlineQueryIncomplete()
-            replaceLoadingWithOptions()
         }
     }
 
@@ -287,7 +292,6 @@ class ModManagementScreen private constructor(
                 Log.error("Could not download mod list", ex)
                 launchOnGLThread {
                     ToastPopup("Could not download mod list", this@ModManagementScreen)
-                    replaceLoadingWithOptions()
                 }
                 Gdx.app.clipboard.contents = ex.stackTraceToString()
                 runningSearchJob = null
@@ -345,6 +349,10 @@ class ModManagementScreen private constructor(
             onlineModsTable.add(getCachedModButton(mod)).row()
         }
 
+        Concurrency.run("Cache mod list"){
+            game.files.saveModCache(onlineModInfo.values.toList())
+        }
+
         // Now the tasks after the 'page' of search results has been fully processed
         // The search has reached the last page!
         if (repoSearch.items.size < amountPerPage) {
@@ -362,8 +370,6 @@ class ModManagementScreen private constructor(
         // continue search unless last page was reached
         if (repoSearch.items.size >= amountPerPage && !stopBackgroundTasks)
             tryDownloadPage(pageNum + 1)
-        else
-            replaceLoadingWithOptions()
     }
 
     private fun markOnlineQueryIncomplete() {
@@ -423,7 +429,9 @@ class ModManagementScreen private constructor(
                     actualDownloadButton.setText("Download".tr())
                     actualDownloadButton.enable()
                 } else
-                    downloadMod(repo) { popup.close() }
+                    downloadMod(repo, {
+                        actualDownloadButton.setText("{Downloading...} ${it}%".tr())
+                    }) { popup.close() }
             }
             popup.add(actualDownloadButton).row()
             popup.addCloseButton()
@@ -466,7 +474,10 @@ class ModManagementScreen private constructor(
         rightSideButton.onClick {
             rightSideButton.setText("Downloading...".tr())
             rightSideButton.disable()
-            downloadMod(repo) {
+            
+            downloadMod(repo,{
+                rightSideButton.setText("{Downloading...} ${it}%".tr())
+            }) {
                 rightSideButton.setText("Downloaded!".tr())
             }
         }
@@ -476,12 +487,13 @@ class ModManagementScreen private constructor(
     }
 
     /** Download and install a mod in the background, called both from the right-bottom button and the URL entry popup */
-    private fun downloadMod(repo: GithubAPI.Repo, postAction: () -> Unit = {}) {
+    private fun downloadMod(repo: GithubAPI.Repo, updateProgressPercent: ((Int)->Unit)? = null, postAction: () -> Unit = {}) {
         Concurrency.run("DownloadMod") { // to avoid ANRs - we've learnt our lesson from previous download-related actions
             try {
                 val modFolder = Github.downloadAndExtract(
                     repo,
-                    UncivGame.Current.files.getModsFolder()
+                    UncivGame.Current.files.getModsFolder(),
+                    updateProgressPercent
                 )
                     ?: throw Exception("Exception during GitHub download")    // downloadAndExtract returns null for 404 errors and the like -> display something!
                 Github.rewriteModOptions(repo, modFolder)
